@@ -1,0 +1,2 @@
+# Packageupdate
+Upgrade packages on the server using ansible playbook  As a precaution,took process list and the packages list and fetch the files to the master server from the slave server.  Also, we are using Asia/Singapore timezone, so when the timezone package gets updated, it will change the timezone to UTC, so I need to set to the same.  Atlast, for the kernel chnage, I have set reboot command and set 1 minute for timeout inorder to gets the server back online after reboot.
