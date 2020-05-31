@@ -1,0 +1,49 @@
+---
+
+- name: 'Playbook'
+  hosts: all
+  become: true
+  remote_user: ec2-user
+  become_method: sudo
+  gather_facts: true
+  tasks:
+
+    - name: Write output command of ps aux
+      shell: ps aux | tee -a /tmp/ps_aux.txt
+
+    - name: Write output command of yum_update
+      shell: yum update | tee -a /tmp/yum_update.txt
+  
+    - name: fetch files from the server
+      fetch:
+        src: /tmp/ps_aux.txt
+        dest: /root/updates/
+        state: absent
+    - name: fetch files from the server
+      fetch:
+        src: /tmp/yum_update.txt
+        dest: /root/updates/
+        state: absent
+    - name: Get timzestamp from the system
+      shell: "date +%Z%z"
+      register: clockzone
+
+    - name: Set timezone to Singapore
+      timezone:
+        name: Asia/Singapore
+      when: clockzone.stdout != "+08+0800"
+
+    - name: Check the uptime
+      shell: uptime
+      register: UPTIME_PRE_REBOOT
+
+    - debug: msg={{UPTIME_PRE_REBOOT.stdout}}
+
+    - name: Unconditionally reboot the machine with all defaults
+      reboot:
+        reboot_timeout: 3600 
+    - name: Check the uptime after reboot
+      shell: uptime
+      register: UPTIME_POST_REBOOT
+
+    - debug: msg={{UPTIME_POST_REBOOT.stdout}}
